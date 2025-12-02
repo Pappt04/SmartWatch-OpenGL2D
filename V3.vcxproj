@@ -153,13 +153,19 @@ copy /Y "$(ProjectDir)dependencies\freetype.dll" "$(OutDir)"</Command>
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BatteryObject.cpp" />
+    <ClCompile Include="EkgObject.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="ObjectRenderer.cpp" />
+    <ClCompile Include="TextRenderer.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BatteryObject.h" />
+    <ClInclude Include="EkgObject.h" />
     <ClInclude Include="ObjectRenderer.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>

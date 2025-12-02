@@ -3,7 +3,7 @@ layout(location = 0) in vec2 aPos;
 layout(location = 1) in vec2 aTex;
 
 uniform mat4 uModel;
-uniform mat4 uProjection; // you can set this once to an orthographic projection
+uniform mat4 uProjection;
 
 out vec2 TexCoords;
 
