@@ -4,6 +4,7 @@
 
 #include <ft2build.h>
 #include <map>
+#include <string>
 #include FT_FREETYPE_H
 
 //Char
