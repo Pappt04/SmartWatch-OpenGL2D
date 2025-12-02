@@ -148,6 +148,8 @@ copy /Y "$(ProjectDir)dependencies\freetype.dll" "$(OutDir)"</Command>
     <None Include="color.frag" />
     <None Include="color.vert" />
     <None Include="packages.config" />
+    <None Include="text.frag" />
+    <None Include="text.vert" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
