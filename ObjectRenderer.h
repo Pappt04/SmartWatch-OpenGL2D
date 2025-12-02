@@ -14,7 +14,7 @@ public:
 	ObjectRenderer(GLuint initShader);
 	~ObjectRenderer();
 
-	void Draw(GLuint texture, glm::vec2 position);
+	void Draw(GLuint texture, glm::vec2 position, glm::vec2 size, glm::float32 rotation = 0.0f);
 private:
 	void verticesInit();
 };
