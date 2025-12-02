@@ -11,6 +11,9 @@
 #include <sstream>
 #include <iomanip>
 #include "Util.h"
+#include "EkgObject.h"
+#include "TextRenderer.h"
+#include "BatteryObject.h"
 
 // Screen states
 enum Screen {
@@ -19,22 +22,10 @@ enum Screen {
 };
 
 // Global variables
-Screen currentScreen = SCREEN_HEART_RATE;
+Screen currentScreen = SCREEN_CLOCK;
 int wWidth = 800, wHeight = 800;
 int hours = 12, minutes = 0, seconds = 0;
 double lastTimeUpdate = 0.0;
-int heartRate = 70;
-double lastHeartRateUpdate = 0.0;
-bool isRunning = false;
-float ekgScrollOffset = 0.0f;
-float ekgScale = 1.0f;
-int batteryPercent = 100;
-double lastBatteryUpdate = 0.0;
-
-// Random generator
-std::random_device rd;
-std::mt19937 gen(rd());
-std::uniform_int_distribution<> heartDist(60, 80);
 
 int endProgram(std::string message) {
 	std::cout << message << std::endl;
@@ -94,39 +85,6 @@ void drawTexturedRect(unsigned int shader, unsigned int VAO, unsigned int textur
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
-void drawColoredRect(unsigned int shader, unsigned int VAO,
-	float x, float y, float width, float height,
-	float r, float g, float b) {
-	glUseProgram(shader);
-
-	float left = 0.0f;
-	float right = (float)wWidth;
-	float bottom = 0.0f;
-	float top = (float)wHeight;
-
-	float projection[16] = {
-		2.0f / (right - left), 0, 0, 0,
-		0, 2.0f / (top - bottom), 0, 0,
-		0, 0, -1, 0,
-		-(right + left) / (right - left), -(top + bottom) / (top - bottom), 0, 1
-	};
-
-	float model[16] = {
-		width, 0, 0, 0,
-		0, height, 0, 0,
-		0, 0, 1, 0,
-		x, y, 0, 1
-	};
-
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uProjection"), 1, GL_FALSE, projection);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uModel"), 1, GL_FALSE, model);
-	glUniform3f(glGetUniformLocation(shader, "uColor"), r, g, b);
-	glUniform1i(glGetUniformLocation(shader, "uUseTexture"), 0);
-
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-}
-
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		double xpos, ypos;
@@ -154,7 +112,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 			// Right arrow
 			if (xpos >= rightArrowX && xpos <= rightArrowX + arrowSize &&
 				ypos >= arrowY && ypos <= arrowY + arrowSize) {
-				currentScreen = SCREEN_CLOCK;
+				currentScreen = SCREEN_HEART_RATE;
 			}
 		}
 	}
@@ -172,6 +130,8 @@ int main()
 
 	wWidth = mode->width;
 	wHeight = mode->height;
+
+	std::cout << "Screen resolution detected: " << wWidth << "x" << wHeight << std::endl;
 
 	GLFWwindow* window = glfwCreateWindow(wWidth, wHeight, "SmartWatch2D", monitor, NULL);
 	if (window == NULL) return endProgram("Prozor nije uspeo da se kreira.");
@@ -235,14 +195,23 @@ int main()
 	glEnableVertexAttribArray(1);
 
 	// Load textures
-	unsigned int arrowLeftTexture, arrowRightTexture;
-	unsigned int ekgTexture, batteryOutlineTexture, warningTexture;
+	unsigned arrowLeftTexture, arrowRightTexture;
+	unsigned warningTexture;
+	unsigned ekgTexture;
+	unsigned batteryTexture;
 
 	preprocessTexture(arrowLeftTexture, "./res/arrow_left.png");
 	preprocessTexture(arrowRightTexture, "./res/arrow_right.png");
-	preprocessTexture(ekgTexture, "./res/ecg_wave.png");
-	preprocessTexture(batteryOutlineTexture, "./res/battery.png");
 	preprocessTexture(warningTexture, "./res/warning.png");
+	preprocessTexture(ekgTexture, "./res/ecg_wave.png");
+	preprocessTexture(batteryTexture, "./res/battery.png");
+
+	// Create object instances
+	EkgObject ekg(ekgTexture,wWidth, wHeight);
+
+	TextRenderer textRenderer(textShader, wWidth, wHeight);
+
+	BatteryObject battery(batteryTexture,wWidth, wHeight);
 
 	// Initialize time
 	time_t now = time(0);
@@ -253,12 +222,11 @@ int main()
 	seconds = ltm.tm_sec;
 
 	lastTimeUpdate = glfwGetTime();
-	lastHeartRateUpdate = glfwGetTime();
-	lastBatteryUpdate = glfwGetTime();
 
 	while (!glfwWindowShouldClose(window))
 	{
 		double currentTime = glfwGetTime();
+		bool isRunning = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
 
 		// Update clock
 		if (currentTime - lastTimeUpdate >= 1.0) {
@@ -277,39 +245,27 @@ int main()
 			}
 		}
 
-		// Check if running (D key pressed)
-		isRunning = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
-
 		// Update heart rate
-		if (currentTime - lastHeartRateUpdate >= 0.1) {
-			lastHeartRateUpdate = currentTime;
-
-			if (isRunning) {
-				heartRate = std::min(220, heartRate + 2);
-				ekgScale = std::max(0.3f, ekgScale - 0.02f);
-			}
-			else {
-				if (heartRate > 70) {
-					heartRate = std::max(70, heartRate - 1);
-				}
-				else {
-					heartRate = heartDist(gen);
-				}
-				ekgScale = std::min(1.0f, ekgScale + 0.01f);
-			}
-		}
-
-		// Update EKG scroll
-		ekgScrollOffset += 0.01f * (heartRate / 70.0f);
-		if (ekgScrollOffset > 1.0f) ekgScrollOffset -= 1.0f;
+		ekg.update(currentTime, isRunning);
 
 		// Update battery
-		if (currentTime - lastBatteryUpdate >= 0.1) {
-			lastBatteryUpdate = currentTime;
-			batteryPercent = std::max(0, batteryPercent - 1);
-		}
+		battery.update(currentTime);
 
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		// Draw left arrow
+		drawTexturedRect(rectShader, VAO, arrowLeftTexture,
+			50.0f, wHeight / 2.0f - 50.0f, 100.0f, 100.0f);
+
+		// Draw battery
+		battery.draw(rectShader, VAO);
+
+		// Draw battery percentage
+		std::string percentText = std::to_string(battery.getPercent()) + "%";
+		float textX = wWidth / 2.0f - 80.0f;
+		float textY = wHeight / 2.0f - 350.0f;
+		textRenderer.renderText(percentText, textX, textY, 1.5f, 1.0f, 1.0f, 1.0f);
+
 
 		// Render based on current screen
 		if (currentScreen == SCREEN_CLOCK) {
@@ -337,65 +293,25 @@ int main()
 				wWidth - 100.0f, wHeight / 2.0f - 50.0f, 100.0f, 100.0f);
 
 			// Draw heart rate number
-			std::string bpmText = std::to_string(heartRate) + " BPM";
+			std::string bpmText = std::to_string(ekg.getHeartRate()) + " BPM";
 			float textX = wWidth / 2.0f - 120.0f;
 			float textY = wHeight / 2.0f + 200.0f;
-			renderText(textShader, bpmText, textX, textY, 1.2f, 1.0f, 0.3f, 0.3f);
+			textRenderer.renderText(bpmText, textX, textY, 1.2f, 1.0f, 0.3f, 0.3f);
 
 			// Draw EKG wave
-			float ekgWidth = 600.0f * ekgScale;
-			float ekgHeight = 150.0f;
-			float ekgX = wWidth / 2.0f - ekgWidth / 2.0f;
-			float ekgY = wHeight / 2.0f - ekgHeight / 2.0f;
-			drawTexturedRect(rectShader, VAO, ekgTexture,
-				ekgX, ekgY, ekgWidth, ekgHeight, ekgScrollOffset, ekgScale);
+			ekg.draw(rectShader, VAO);
 
 			// Draw warning if heart rate > 200
-			if (heartRate > 200) {
+			if (ekg.getHeartRate() > 200) {
 				drawTexturedRect(rectShader, VAO, warningTexture,
 					wWidth / 2.0f - 300.0f, wHeight / 2.0f - 300.0f,
 					600.0f, 600.0f);
 
-				renderText(textShader, "STOP! ODMORI SE!",
+				textRenderer.renderText("STOP! ODMORI SE!",
 					wWidth / 2.0f - 250.0f, wHeight / 2.0f - 50.0f,
 					1.2f, 1.0f, 0.0f, 0.0f);
 			}
 		}
-		// Draw left arrow
-		drawTexturedRect(rectShader, VAO, arrowLeftTexture,
-			50.0f, wHeight / 2.0f - 50.0f, 100.0f, 100.0f);
-
-		// Draw battery outline
-		float batteryWidth = 300.0f;
-		float batteryHeight = 500.0f;
-		float batteryX = wWidth / 2.0f - batteryWidth / 2.0f;
-		float batteryY = wHeight / 2.0f - batteryHeight / 2.0f;
-		drawTexturedRect(rectShader, VAO, batteryOutlineTexture,
-			batteryX, batteryY, batteryWidth, batteryHeight);
-
-		// Draw battery fill
-		float fillHeight = (batteryHeight - 60.0f) * (batteryPercent / 100.0f);
-		float fillWidth = batteryWidth - 60.0f;
-		float fillX = batteryX + 30.0f;
-		float fillY = batteryY + batteryHeight - 40.0f - fillHeight;
-
-		// Set color based on percentage
-		if (batteryPercent > 20) {
-			drawColoredRect(rectShader, VAO, fillX, fillY, fillWidth, fillHeight, 0.0f, 1.0f, 0.0f);
-		}
-		else if (batteryPercent > 10) {
-			drawColoredRect(rectShader, VAO, fillX, fillY, fillWidth, fillHeight, 1.0f, 1.0f, 0.0f);
-		}
-		else {
-			drawColoredRect(rectShader, VAO, fillX, fillY, fillWidth, fillHeight, 1.0f, 0.0f, 0.0f);
-		}
-
-		// Draw battery percentage
-		std::string percentText = std::to_string(batteryPercent) + "%";
-		float textX = wWidth / 2.0f - 80.0f;
-		float textY = wHeight / 2.0f - 350.0f;
-		renderText(textShader, percentText, textX, textY, 1.5f, 1.0f, 1.0f, 1.0f);
-
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
