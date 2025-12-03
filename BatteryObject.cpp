@@ -9,7 +9,6 @@ extern int wWidth, wHeight;
 BatteryObject::BatteryObject(unsigned int texture, int screenWidth, int screenHeight)
 	: batteryTexture(texture), wWidth(screenWidth), wHeight(screenHeight),
 	percent(100), lastUpdate(0.0) {
-	// Horizontal battery dimensions
 	batteryWidth = 300.0f;
 	batteryHeight = 150.0f;
 	batteryX = wWidth / 2.0f - batteryWidth / 2.0f;

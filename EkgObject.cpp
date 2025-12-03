@@ -43,7 +43,7 @@ void EkgObject::update(double currentTime, bool running) {
     }
 
     // Scrolling speed increases with heart rate
-    scrollOffset += 0.0001f * (heartRate / 70.0f);
+    scrollOffset += 0.0005f * (heartRate / 70.0f);
     if (scrollOffset > 1.0f) scrollOffset -= 1.0f;
 }
 
@@ -61,7 +61,7 @@ void EkgObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
     float ekgHeight = baseHeight * heightScale;
 
     // Width stays constant for better visibility
-    float ekgWidth = 800.0f;
+    float ekgWidth = 500.0f;
 
     glm::vec2 ekgPos(wWidth / 2.0f - ekgWidth / 2.0f, wHeight / 2.0f - ekgHeight / 2.0f);
     glm::vec2 ekgSize(ekgWidth, ekgHeight);
@@ -70,7 +70,7 @@ void EkgObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
     // Higher BPM = MORE waves (higher frequency)
     // Lower BPM = FEWER waves (lower frequency)
     // Scale range: 0.3 at rest to 1.5 when running
-    float texScale = 0.3f + ((heartRate - 70.0f) / 150.0f) * 1.2f;  // 0.3 to 1.5
+    float texScale = 2.f + ((heartRate - 70.0f) / 150.0f) * 1.2f;  // 0.3 to 1.5
     texScale = std::max(0.3f, std::min(1.5f, texScale));
 
     // Pass texture offset and scale to create scrolling effect
