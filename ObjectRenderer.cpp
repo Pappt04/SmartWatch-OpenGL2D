@@ -1,4 +1,6 @@
 #include "ObjectRenderer.h"
+#include <vector>
+#include <cmath>
 
 ObjectRenderer::ObjectRenderer(unsigned int initShader, int screenWidth, int screenHeight)
     : shader(initShader), wWidth(screenWidth), wHeight(screenHeight) {
@@ -219,6 +221,54 @@ void ObjectRenderer::DrawTexturedRectangle(unsigned int texture, float x, float 
     glBindVertexArray(0);
     glDeleteBuffers(1, &tempVBO);
     glDeleteVertexArrays(1, &tempVAO);
+}
+
+void ObjectRenderer::DrawCircle(glm::vec2 center, float radius, glm::vec3 color, int segments) {
+    // Create circle vertices using triangle fan
+    std::vector<float> vertices;
+    
+    // Center point
+    vertices.push_back(center.x);
+    vertices.push_back(center.y);
+    
+    // Circle points
+    for (int i = 0; i <= segments; i++) {
+        float angle = 2.0f * 3.14159265359f * float(i) / float(segments);
+        float x = center.x + radius * cos(angle);
+        float y = center.y + radius * sin(angle);
+        vertices.push_back(x);
+        vertices.push_back(y);
+    }
+    
+    // Create temporary VAO and VBO
+    unsigned int circleVAO, circleVBO;
+    glGenVertexArrays(1, &circleVAO);
+    glGenBuffers(1, &circleVBO);
+    
+    glBindVertexArray(circleVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, circleVBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    
+    // Use identity model matrix (vertices are already in world space)
+    glm::mat4 model(1.0f);
+    
+    glUseProgram(shader);
+    setupProjection();
+    glUniformMatrix4fv(glGetUniformLocation(shader, "uModel"),
+        1, GL_FALSE, glm::value_ptr(model));
+    glUniform1i(glGetUniformLocation(shader, "uUseTexture"), 0);
+    glUniform3f(glGetUniformLocation(shader, "uColor"), color.r, color.g, color.b);
+    
+    glBindVertexArray(circleVAO);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
+    
+    // Cleanup
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &circleVBO);
+    glDeleteVertexArrays(1, &circleVAO);
 }
 
 void ObjectRenderer::verticesInit() {

@@ -26,6 +26,7 @@ private:
 
     void drawArrows(ObjectRenderer& renderer);
     bool checkArrowClick(double xpos, double ypos, bool isLeft);
+    void drawWatchBezel(ObjectRenderer& renderer);
 
 public:
     ScreenManager(int screenWidth, int screenHeight, unsigned int rightArrow);

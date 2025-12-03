@@ -16,5 +16,5 @@ void TextRenderer::renderText(const std::string& text, float x, float y, float s
 
 void TextRenderer::renderTextRectangle(unsigned int shader, std::string text, float x, float y, float width, float height, float r, float g, float b)
 {
-	::renderTextRectangle(shader, text, x, y, width, height, r, g, b);
+	::renderTextRectangle(textShader, text, x, y, width, height, r, g, b);
 }

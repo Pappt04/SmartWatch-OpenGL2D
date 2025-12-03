@@ -63,7 +63,7 @@ void ScreenManager::drawArrows(ObjectRenderer& renderer) {
         break;
 
     case SCREEN_HEART_RATE:
-        // Left arrow
+        // Left arrow (flipped)
         renderer.DrawFlipped(arrowRightTexture,
             glm::vec2(50.0f, arrowY),
             arrowSize, true, false, 0.0f);
@@ -74,7 +74,7 @@ void ScreenManager::drawArrows(ObjectRenderer& renderer) {
         break;
 
     case SCREEN_BATTERY:
-        // Left arrow
+        // Left arrow (flipped)
         renderer.DrawFlipped(arrowRightTexture,
             glm::vec2(50.0f, arrowY),
             arrowSize, true, false, 0.0f);
@@ -82,7 +82,25 @@ void ScreenManager::drawArrows(ObjectRenderer& renderer) {
     }
 }
 
+void ScreenManager::drawWatchBezel(ObjectRenderer& renderer) {
+    // Draw circular smartwatch bezel in the center of the screen
+    float centerX = wWidth / 2.0f;
+    float centerY = wHeight / 2.0f;
+    float watchRadius = 350.0f;  // Radius of the watch face
+    
+    // Draw outer bezel (dark gray)
+    glm::vec3 bezelColor(0.2f, 0.2f, 0.2f);
+    renderer.DrawCircle(glm::vec2(centerX, centerY), watchRadius + 15.0f, bezelColor, 100);
+    
+    // Draw inner watch face (very dark, almost black)
+    glm::vec3 watchFaceColor(0.05f, 0.05f, 0.08f);
+    renderer.DrawCircle(glm::vec2(centerX, centerY), watchRadius, watchFaceColor, 100);
+}
+
 void ScreenManager::draw(ObjectRenderer& renderer, TextRenderer& textRenderer, bool isRunning) {
+    // Draw the circular watch bezel first
+    drawWatchBezel(renderer);
+    
     // Draw arrows
     drawArrows(renderer);
 

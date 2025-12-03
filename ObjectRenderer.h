@@ -38,4 +38,7 @@ public:
     // Draw textured rectangle at exact position (no center translation)
     void DrawTexturedRectangle(unsigned int texture, float x, float y,
         float width, float height);
+    
+    // For drawing circles
+    void DrawCircle(glm::vec2 center, float radius, glm::vec3 color, int segments = 64);
 };
