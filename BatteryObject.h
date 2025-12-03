@@ -1,33 +1,33 @@
 #pragma once
+
 #include <GL/glew.h>
-#include "Util.h"
-#include <string>
+
+class ObjectRenderer;
+class TextRenderer;
 
 class BatteryObject {
 private:
     unsigned int batteryTexture;
+    int wWidth, wHeight;
     int percent;
     double lastUpdate;
-    
-    float batteryWidth;
     float batteryHeight;
+    float batteryWidth;
     float batteryX;
     float batteryY;
-    
-    int wWidth;
-    int wHeight;
+
+    void drawColoredRect(ObjectRenderer& renderer, float x, float y,
+        float width, float height, float r, float g, float b);
 
 public:
-    BatteryObject(unsigned texture,int screenWidth, int screenHeight);
+    BatteryObject(unsigned int texture, int screenWidth, int screenHeight);
     ~BatteryObject();
-    
-    void update(double currentTime);
-    void draw(unsigned int shader, unsigned int VAO);
-    void drawColoredRect(unsigned int shader, unsigned int VAO, 
-                         float x, float y, float width, float height,
-                         float r, float g, float b);
-    
-    int getPercent() const { return percent; }
-    void setPercent(int p) { percent = p; }
-};
 
+    void update(double currentTime);
+    void draw(ObjectRenderer& renderer, TextRenderer& textRenderer);
+
+    // Draw battery indicator in top-right corner (for all screens)
+    void drawIndicator(ObjectRenderer& renderer, TextRenderer& textRenderer);
+
+    int getPercent() const { return percent; }
+};

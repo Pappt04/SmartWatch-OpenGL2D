@@ -154,16 +154,20 @@ copy /Y "$(ProjectDir)dependencies\freetype.dll" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BatteryObject.cpp" />
+    <ClCompile Include="ClockScreen.cpp" />
     <ClCompile Include="EkgObject.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="ObjectRenderer.cpp" />
+    <ClCompile Include="ScreenManager.cpp" />
     <ClCompile Include="TextRenderer.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BatteryObject.h" />
+    <ClInclude Include="ClockScreen.h" />
     <ClInclude Include="EkgObject.h" />
     <ClInclude Include="ObjectRenderer.h" />
+    <ClInclude Include="ScreenManager.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="Util.h" />

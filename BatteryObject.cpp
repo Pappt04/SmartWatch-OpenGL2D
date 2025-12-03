@@ -1,22 +1,19 @@
 #include "BatteryObject.h"
-#include "Util.h"
+#include "ObjectRenderer.h"
+#include "TextRenderer.h"
 #include <algorithm>
+#include <string>
 
 extern int wWidth, wHeight;
 
-BatteryObject::BatteryObject(unsigned texture, int screenWidth, int screenHeight)
-{
-	wWidth = screenWidth;
-	wHeight = screenHeight;
-	percent = 100;
-	lastUpdate = 0.0;
-	batteryHeight = 300.0f;
-	batteryWidth = 200.0f;
-
-	batteryX = batteryWidth + 50.f;
-	batteryY = wHeight - 50.0f;
-
-	batteryTexture = texture;
+BatteryObject::BatteryObject(unsigned int texture, int screenWidth, int screenHeight)
+	: batteryTexture(texture), wWidth(screenWidth), wHeight(screenHeight),
+	percent(100), lastUpdate(0.0) {
+	// Horizontal battery dimensions
+	batteryWidth = 300.0f;
+	batteryHeight = 150.0f;
+	batteryX = wWidth / 2.0f - batteryWidth / 2.0f;
+	batteryY = wHeight / 2.0f - batteryHeight / 2.0f;
 }
 
 BatteryObject::~BatteryObject() {
@@ -26,94 +23,95 @@ BatteryObject::~BatteryObject() {
 }
 
 void BatteryObject::update(double currentTime) {
-	// Update battery drain every 10 seconds
-	if (currentTime - lastUpdate >= 0.2) {
+	if (currentTime - lastUpdate >= 10.0) {
 		lastUpdate = currentTime;
 		percent = std::max(0, percent - 1);
 	}
 }
 
-void BatteryObject::drawColoredRect(unsigned int shader, unsigned int VAO,
-	float x, float y, float width, float height,
-	float r, float g, float b) {
-	glUseProgram(shader);
-
-	float left = 0.0f;
-	float right = (float)wWidth;
-	float bottom = 0.0f;
-	float top = (float)wHeight;
-
-	float projection[16] = {
-		2.0f / (right - left), 0, 0, 0,
-		0, 2.0f / (top - bottom), 0, 0,
-		0, 0, -1, 0,
-		-(right + left) / (right - left), -(top + bottom) / (top - bottom), 0, 1
-	};
-
-	float model[16] = {
-		width, 0, 0, 0,
-		0, height, 0, 0,
-		0, 0, 1, 0,
-		x, y, 0, 1
-	};
-
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uProjection"), 1, GL_FALSE, projection);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uModel"), 1, GL_FALSE, model);
-	glUniform3f(glGetUniformLocation(shader, "uColor"), r, g, b);
-	glUniform1i(glGetUniformLocation(shader, "uUseTexture"), 0);
-
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+void BatteryObject::drawColoredRect(ObjectRenderer& renderer, float x, float y,
+	float width, float height, float r, float g, float b) {
+	glm::vec2 pos(x, y);
+	glm::vec2 size(width, height);
+	glm::vec3 color(r, g, b);
+	renderer.DrawColored(pos, size, color, 0.0f);
 }
 
-void BatteryObject::draw(unsigned int shader, unsigned int VAO) {
+void BatteryObject::drawIndicator(ObjectRenderer& renderer, TextRenderer& textRenderer) {
 	if (batteryTexture == 0) return;
 
-	glUseProgram(shader);
-	glBindTexture(GL_TEXTURE_2D, batteryTexture);
+	// Draw small horizontal battery icon in top-right corner
+	float smallBatteryWidth = batteryWidth + 50.f;//120.0f;
+	float smallBatteryHeight = batteryHeight + 50.f;//60.0f;
+	float smallBatteryX = wWidth - smallBatteryWidth - 80.0f;
+	float smallBatteryY = wHeight - smallBatteryHeight - 20.0f;
 
-	// Projection matrix
-	float left = 0.0f;
-	float right = (float)wWidth;
-	float bottom = 0.0f;
-	float top = (float)wHeight;
+	glm::vec2 batteryPos(smallBatteryX, smallBatteryY);
+	glm::vec2 batterySize(smallBatteryWidth, smallBatteryHeight);
+	renderer.Draw(batteryTexture, batteryPos, batterySize, 0.0f);
 
-	float projection[16] = {
-		2.0f / (right - left), 0, 0, 0,
-		0, 2.0f / (top - bottom), 0, 0,
-		0, 0, -1, 0,
-		-(right + left) / (right - left), -(top + bottom) / (top - bottom), 0, 1
-	};
-
-	// Draw battery outline
-	float model[16] = {
-		batteryWidth, 0, 0, 0,
-		0, batteryHeight, 0, 0,
-		0, 0, 1, 0,
-		batteryX, batteryY, 0, 1
-	};
-
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uProjection"), 1, GL_FALSE, projection);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uModel"), 1, GL_FALSE, model);
-	glUniform1i(glGetUniformLocation(shader, "uUseTexture"), 1);
-
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-	// Draw battery fill
-	float fillHeight = (batteryHeight - 60.0f);// *(percent / 100.0f);
-	float fillWidth = (batteryWidth - 60.0f) * (percent / 100.f);
-	float fillX = batteryX + batteryWidth + 30.0f - fillWidth;
-	float fillY = 0.f;// batteryY - 40.0f;
+	// Draw battery fill (left to right)
+	float fillPadding = 12.0f;
+	float fillWidth = (smallBatteryWidth - 2.0f * fillPadding) * (percent / 100.0f);
+	float fillHeight = smallBatteryHeight - 2.0f * fillPadding;
+	float fillX = smallBatteryX + fillPadding;
+	float fillY = smallBatteryY + fillPadding;
 
 	// Set color based on percentage
+	glm::vec3 fillColor;
 	if (percent > 20) {
-		drawColoredRect(shader, VAO, fillX, fillY, fillWidth, fillHeight, 0.0f, 1.0f, 0.0f);
+		fillColor = glm::vec3(0.0f, 1.0f, 0.0f);  // Green
 	}
 	else if (percent > 10) {
-		drawColoredRect(shader, VAO, fillX, fillY, fillWidth, fillHeight, 1.0f, 1.0f, 0.0f);
+		fillColor = glm::vec3(1.0f, 1.0f, 0.0f);  // Yellow
 	}
 	else {
-		drawColoredRect(shader, VAO, fillX, fillY, fillWidth, fillHeight, 1.0f, 0.0f, 0.0f);
+		fillColor = glm::vec3(1.0f, 0.0f, 0.0f);  // Red
 	}
+
+	drawColoredRect(renderer, fillX, fillY, fillWidth, fillHeight,
+		fillColor.r, fillColor.g, fillColor.b);
+
+	// Draw percentage text next to battery
+	std::string percentText = std::to_string(percent) + "%";
+	float textX = smallBatteryX - 60.0f;
+	float textY = smallBatteryY - 60.0f;
+	textRenderer.renderText(percentText, textX, textY, 0.5f, 1.0f, 1.0f, 1.0f);
+}
+
+void BatteryObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
+	if (batteryTexture == 0) return;
+
+	// Draw large horizontal battery in center (for battery screen)
+	glm::vec2 batteryPos(batteryX, batteryY);
+	glm::vec2 batterySize(batteryWidth, batteryHeight);
+	renderer.Draw(batteryTexture, batteryPos, batterySize, 0.0f);
+
+	// Draw battery fill (left to right)
+	float fillPadding = 30.0f;
+	float fillWidth = (batteryWidth - 2.0f * fillPadding) * (percent / 100.0f);
+	float fillHeight = batteryHeight - 2.0f * fillPadding;
+	float fillX = batteryX + fillPadding;
+	float fillY = batteryY + fillPadding;
+
+	// Set color based on percentage
+	glm::vec3 fillColor;
+	if (percent > 20) {
+		fillColor = glm::vec3(0.0f, 1.0f, 0.0f);  // Green
+	}
+	else if (percent > 10) {
+		fillColor = glm::vec3(1.0f, 1.0f, 0.0f);  // Yellow
+	}
+	else {
+		fillColor = glm::vec3(1.0f, 0.0f, 0.0f);  // Red
+	}
+
+	drawColoredRect(renderer, fillX, fillY, fillWidth, fillHeight,
+		fillColor.r, fillColor.g, fillColor.b);
+
+	// Draw battery percentage text above battery
+	std::string percentText = std::to_string(percent) + "%";
+	float textX = wWidth / 2.0f - 80.0f;
+	float textY = batteryY + batteryHeight + 50.0f;
+	textRenderer.renderText(percentText, textX, textY, 1.5f, 1.0f, 1.0f, 1.0f);
 }
