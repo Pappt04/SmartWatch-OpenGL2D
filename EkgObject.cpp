@@ -66,17 +66,16 @@ void EkgObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
     float centerX = wWidth / 2.0f;
     float centerY = wHeight / 2.0f;
     
-    glm::vec2 ekgPos(centerX - ekgWidth / 2.0f, centerY - ekgHeight / 2.0f - 30.0f);  // Slight upward offset
     glm::vec2 ekgSize(ekgWidth, ekgHeight);
+	glm::uvec2 ekgPos(centerX, centerY);  
 
     // Frequency increases with heart rate
     float texScale = 2.f + ((heartRate - 70.0f) / 150.0f) * 1.2f;
     texScale = std::max(0.3f, std::min(1.5f, texScale));
 
     // Pass texture offset and scale to create scrolling effect
-    //renderer.Draw(texture, ekgPos, ekgSize, 0.0f, scrollOffset, texScale);
-	renderer.DrawTexturedRectangle(texture, ekgPos.x, ekgPos.y, ekgSize.x, ekgSize.y);
-
+    renderer.Draw(texture, ekgPos, ekgSize, 0.0f, scrollOffset, texScale);
+	
     // Draw heart rate text using renderTextRectangle - positioned below EKG
     std::string bpmText = std::to_string(heartRate) + " BPM";
     float textRectWidth = 200.0f;
