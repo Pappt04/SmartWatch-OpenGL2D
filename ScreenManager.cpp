@@ -17,12 +17,21 @@ ScreenManager::~ScreenManager() {
 }
 
 bool ScreenManager::checkArrowClick(double xpos, double ypos, bool isLeft) {
-    float arrowX = isLeft ? 50.0f : wWidth - 150.0f;
-    float arrowY = wHeight / 2.0f - 50.0f;
-    float arrowSize = 100.0f;
+    // Calculate arrow positions relative to the watch center
+    float centerX = wWidth / 2.0f;
+    float centerY = wHeight / 2.0f;
+    float watchRadius = 350.0f;
+    
+    // Position arrows closer to the watch edges
+    float arrowSize = 80.0f;  // Reduced from 100
+    float arrowOffset = watchRadius - arrowSize - 20.0f;  // 20px inside watch edge
+    
+    float arrowX = isLeft ? (centerX - arrowOffset - arrowSize) : (centerX + arrowOffset);
+    float arrowY = centerY - arrowSize / 2.0f;
 
+    // More precise click detection - must click within arrow bounds
     return (xpos >= arrowX && xpos <= arrowX + arrowSize &&
-        ypos >= arrowY && ypos <= arrowY + arrowSize);
+            ypos >= arrowY && ypos <= arrowY + arrowSize);
 }
 
 void ScreenManager::handleClick(double xpos, double ypos) {
@@ -51,33 +60,42 @@ void ScreenManager::handleClick(double xpos, double ypos) {
 }
 
 void ScreenManager::drawArrows(ObjectRenderer& renderer) {
-    glm::vec2 arrowSize(100.0f, 100.0f);
-    float arrowY = wHeight / 2.0f - 50.0f;
+    // Calculate arrow positions relative to the watch center
+    float centerX = wWidth / 2.0f;
+    float centerY = wHeight / 2.0f;
+    float watchRadius = 350.0f;
+    
+    // Position arrows closer to the watch edges
+    float arrowSize = 80.0f;  // Reduced from 100
+    float arrowOffset = watchRadius - arrowSize - 20.0f;  // 20px inside watch edge
+    
+    glm::vec2 arrowSizeVec(arrowSize, arrowSize);
+    float arrowY = centerY - arrowSize / 2.0f;
 
     switch (currentScreen) {
     case SCREEN_CLOCK:
         // Right arrow only
         renderer.Draw(arrowRightTexture,
-            glm::vec2(wWidth - 150.0f, arrowY),
-            arrowSize, 0.0f);
+            glm::vec2(centerX + arrowOffset, arrowY),
+            arrowSizeVec, 0.0f);
         break;
 
     case SCREEN_HEART_RATE:
         // Left arrow (flipped)
         renderer.DrawFlipped(arrowRightTexture,
-            glm::vec2(50.0f, arrowY),
-            arrowSize, true, false, 0.0f);
+            glm::vec2(centerX - arrowOffset - arrowSize, arrowY),
+            arrowSizeVec, true, false, 0.0f);
         // Right arrow
         renderer.Draw(arrowRightTexture,
-            glm::vec2(wWidth - 150.0f, arrowY),
-            arrowSize, 0.0f);
+            glm::vec2(centerX + arrowOffset, arrowY),
+            arrowSizeVec, 0.0f);
         break;
 
     case SCREEN_BATTERY:
         // Left arrow (flipped)
         renderer.DrawFlipped(arrowRightTexture,
-            glm::vec2(50.0f, arrowY),
-            arrowSize, true, false, 0.0f);
+            glm::vec2(centerX - arrowOffset - arrowSize, arrowY),
+            arrowSizeVec, true, false, 0.0f);
         break;
     }
 }

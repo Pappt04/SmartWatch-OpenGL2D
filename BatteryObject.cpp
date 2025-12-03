@@ -83,15 +83,17 @@ void BatteryObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
 	// Draw large horizontal battery in center (for battery screen)
 	glm::vec2 batteryPos(batteryX, batteryY);
 	glm::vec2 batterySize(batteryWidth, batteryHeight);
-	renderer.Draw(batteryTexture, batteryPos, batterySize, 0.0f);
+	
+	//renderer.Draw(batteryTexture, batteryPos, batterySize, 0.0f);
+	renderer.DrawTexturedRectangle(batteryTexture, batteryX, batteryY, batteryWidth, batteryHeight);
 
 	// Calculate battery fill dimensions to fit inside texture
-	float fillPadding = 15.0f;
-	float maxFillWidth = batteryWidth - 2.0f * fillPadding - 25.0f;
+	float fillPadding = 55.0f;
+	float maxFillWidth = batteryWidth - 2.0f * fillPadding;
 	float fillWidth = maxFillWidth * (percent / 100.0f);
 	float fillHeight = batteryHeight - 2.0f * fillPadding;
 
-	float fillX = batteryX + fillPadding;
+	float fillX = batteryX + fillPadding / 2;
 	float fillY = batteryY + fillPadding;
 
 	// Set color based on percentage

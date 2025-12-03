@@ -50,19 +50,23 @@ void EkgObject::update(double currentTime, bool running) {
 void EkgObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
     if (texture == 0) return;
 
-    // Calculate height based on BPM
+    // Calculate height based on BPM - scaled to fit within watch
     // Higher BPM = TALLER waves (more energetic heart)
     // Lower BPM = SHORTER waves (calm heart)
-    float baseHeight = 200.0f;
-    float maxHeight = 400.0f;
+    float baseHeight = 150.0f;  // Reduced to fit in watch
+    float maxHeight = 250.0f;   // Reduced to fit in watch
     float heightScale = 1.0f + ((heartRate - 70.0f) / 150.0f);
-    heightScale = std::max(1.0f, std::min(2.0f, heightScale));
+    heightScale = std::max(1.0f, std::min(1.67f, heightScale));
     float ekgHeight = baseHeight * heightScale;
 
-    // Width stays constant for better visibility
-    float ekgWidth = 500.0f;
+    // Width scaled to fit within the watch (leave room for arrows)
+    float ekgWidth = 400.0f;  // Reduced to fit better in watch
 
-    glm::vec2 ekgPos(wWidth / 2.0f - ekgWidth / 2.0f, wHeight / 2.0f - ekgHeight / 2.0f);
+    // Center the EKG within the watch
+    float centerX = wWidth / 2.0f;
+    float centerY = wHeight / 2.0f;
+    
+    glm::vec2 ekgPos(centerX - ekgWidth / 2.0f, centerY - ekgHeight / 2.0f - 30.0f);  // Slight upward offset
     glm::vec2 ekgSize(ekgWidth, ekgHeight);
 
     // Frequency increases with heart rate
@@ -70,26 +74,30 @@ void EkgObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
     texScale = std::max(0.3f, std::min(1.5f, texScale));
 
     // Pass texture offset and scale to create scrolling effect
-    renderer.Draw(texture, ekgPos, ekgSize, 0.0f, scrollOffset, texScale);
+    //renderer.Draw(texture, ekgPos, ekgSize, 0.0f, scrollOffset, texScale);
+	renderer.DrawTexturedRectangle(texture, ekgPos.x, ekgPos.y, ekgSize.x, ekgSize.y);
 
-    // Draw heart rate text using renderTextRectangle
+    // Draw heart rate text using renderTextRectangle - positioned below EKG
     std::string bpmText = std::to_string(heartRate) + " BPM";
     float textRectWidth = 200.0f;
     float textRectHeight = 60.0f;
-    float textX = wWidth / 2.0f - textRectWidth / 2.0f;
-    float textY = wHeight / 2.0f + 200.0f;
+    float textX = centerX - textRectWidth / 2.0f;
+    float textY = centerY + ekgHeight / 2.0f + 20.0f;  // Below the EKG
     textRenderer.renderTextRectangle(0, bpmText, textX, textY, textRectWidth, textRectHeight, 1.0f, 0.3f, 0.3f);
 
-    // Draw warning if heart rate > 200
+    // Draw warning if heart rate > 200 - scaled to fit in watch
     if (heartRate > 200) {
-        glm::vec2 warnPos(wWidth / 2.0f - 300.0f, wHeight / 2.0f - 300.0f);
-        glm::vec2 warnSize(600.0f, 600.0f);
-        renderer.Draw(warningTexture, warnPos, warnSize, 0.0f);
+        float warnSize = 300.0f;  // Reduced from 600
+        glm::vec2 warnPos(centerX - warnSize / 2.0f, centerY - warnSize / 2.0f);
+        glm::vec2 warnSizeVec(warnSize, warnSize);
+        
+        //renderer.Draw(warningTexture, warnPos, warnSizeVec, 0.0f);
+		renderer.DrawTexturedRectangle(warningTexture, warnPos.x, warnPos.y, warnSizeVec.x, warnSizeVec.y);
 
-        float warnTextWidth = 500.0f;
-        float warnTextHeight = 80.0f;
-        float warnTextX = wWidth / 2.0f - warnTextWidth / 2.0f;
-        float warnTextY = wHeight / 2.0f - 50.0f;
+        float warnTextWidth = 350.0f;
+        float warnTextHeight = 60.0f;
+        float warnTextX = centerX - warnTextWidth / 2.0f;
+        float warnTextY = centerY - 30.0f;
         textRenderer.renderTextRectangle(0, "STOP! ODMORI SE!", warnTextX, warnTextY, warnTextWidth, warnTextHeight, 1.0f, 0.0f, 0.0f);
     }
 }

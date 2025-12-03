@@ -73,11 +73,11 @@ int main() {
     glfwMakeContextCurrent(window);
 
     // Set custom cursor
-    basicCursor = loadImageToCursor("./res/red_heart.png");
-    pressedCursor = loadImageToCursor("./res/red_heart_pressed.png");
-    if (basicCursor != nullptr) {
-        glfwSetCursor(window, basicCursor);
-    }
+    //basicCursor = loadImageToCursor("./res/red_heart.png");
+    //pressedCursor = loadImageToCursor("./res/red_heart_pressed.png");
+    //if (basicCursor != nullptr) {
+    //    glfwSetCursor(window, basicCursor);
+    //}
 
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
