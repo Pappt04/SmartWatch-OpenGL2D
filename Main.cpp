@@ -12,6 +12,9 @@
 int wWidth = 800, wHeight = 800;
 ScreenManager* g_screenManager = nullptr;
 
+GLFWcursor* basicCursor = nullptr;
+GLFWcursor* pressedCursor = nullptr;
+
 int endProgram(std::string message) {
     std::cout << message << std::endl;
     cleanupFreeType();
@@ -35,7 +38,12 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && g_screenManager) {
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
+        glfwSetCursor(window, pressedCursor);
         g_screenManager->handleClick(xpos, ypos);
+    }
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        glfwSetCursor(window, basicCursor);
     }
 }
 
@@ -65,9 +73,10 @@ int main() {
     glfwMakeContextCurrent(window);
 
     // Set custom cursor
-    GLFWcursor* heartCursor = loadImageToCursor("./res/red_heart.svg.png");
-    if (heartCursor != nullptr) {
-        glfwSetCursor(window, heartCursor);
+    basicCursor = loadImageToCursor("./res/red_heart.png");
+    pressedCursor = loadImageToCursor("./res/red_heart_pressed.png");
+    if (basicCursor != nullptr) {
+        glfwSetCursor(window, basicCursor);
     }
 
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
@@ -85,7 +94,6 @@ int main() {
         }
     }
 
-    // OpenGL settings
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
@@ -105,7 +113,7 @@ int main() {
     glUniformMatrix4fv(glGetUniformLocation(textShader, "projection"),
         1, GL_FALSE, textProjection);
 
-    // Load textures - only need right arrow, we'll flip it for left
+    // Load textures
     unsigned arrowRightTexture, warningTexture;
     unsigned ekgTexture, batteryTexture;
 
@@ -122,7 +130,6 @@ int main() {
     EkgObject ekgScreen(ekgTexture, warningTexture, wWidth, wHeight);
     BatteryObject batteryScreen(batteryTexture, wWidth, wHeight);
 
-    // Create screen manager (only pass right arrow, it will flip for left)
     ScreenManager screenManager(wWidth, wHeight, arrowRightTexture);
     screenManager.setClockScreen(&clockScreen);
     screenManager.setEkgScreen(&ekgScreen);
@@ -142,7 +149,7 @@ int main() {
         // Render
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Draw current screen (includes battery indicator and arrows)
+        // Draw current screen
         screenManager.draw(renderer, textRenderer, isRunning);
 
         glfwSwapBuffers(window);
@@ -152,7 +159,8 @@ int main() {
     // Cleanup
     glDeleteProgram(rectShader);
     glDeleteProgram(textShader);
-    if (heartCursor) glfwDestroyCursor(heartCursor);
+    if (basicCursor) glfwDestroyCursor(basicCursor);
+    if (pressedCursor) glfwDestroyCursor(pressedCursor);
     cleanupFreeType();
     glfwDestroyWindow(window);
     glfwTerminate();

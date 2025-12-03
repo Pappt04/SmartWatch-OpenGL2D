@@ -174,8 +174,9 @@ copy /Y "$(ProjectDir)dependencies\freetype.dll" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\..\..\Downloads\ecg-lines.png" />
-    <Image Include="..\..\..\..\..\..\Downloads\red_heart.svg.png" />
+    <Image Include="..\..\..\..\..\..\Downloads\red_heart.png" />
     <Image Include="res\full-battery.png" />
+    <Image Include="res\red_heart_pressed.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

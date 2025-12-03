@@ -280,3 +280,76 @@ void renderText(unsigned int shader, std::string text, float x, float y, float s
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void renderTextRectangle(unsigned int shader, std::string text, float x, float y, float width, float height, float r, float g, float b)
+{
+    glUseProgram(shader);
+    glUniform3f(glGetUniformLocation(shader, "textColor"), r, g, b);
+    glActiveTexture(GL_TEXTURE0);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Calculate total text width to determine scale
+    float totalWidth = 0.0f;
+    float maxHeight = 0.0f;
+
+    for (char c : text)
+    {
+        Character ch = Characters[c];
+        totalWidth += (ch.Advance >> 6);
+        if (ch.SizeY > maxHeight)
+            maxHeight = (float)ch.SizeY;
+    }
+
+    // Calculate scale to fit within the rectangle
+    float scaleX = width / totalWidth;
+    float scaleY = height / maxHeight;
+    float scale = std::min(scaleX, scaleY); // Use smaller scale to fit both dimensions
+
+    // Calculate starting position to align text at bottom-left of rectangle
+    float currentX = x;
+    float baseY = y;
+
+    for (char c : text)
+    {
+        Character ch = Characters[c];
+
+        float xpos = currentX + ch.BearingX * scale;
+        float ypos = baseY + (maxHeight - ch.BearingY) * scale;
+
+        float w = ch.SizeX * scale;
+        float h = ch.SizeY * scale;
+
+        float vertices[6][4] = {
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos,     ypos,       0.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+            { xpos + w, ypos + h,   1.0f, 0.0f }
+        };
+
+        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+
+        unsigned int VBO, VAO;
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glDeleteVertexArrays(1, &VAO);
+        glDeleteBuffers(1, &VBO);
+
+        currentX += (ch.Advance >> 6) * scale;
+    }
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}

@@ -26,3 +26,4 @@ GLFWcursor* loadImageToCursor(const char* filePath);
 bool initFreeType(const char* fontPath, unsigned int fontSize);
 void cleanupFreeType();
 void renderText(unsigned int shader, std::string text, float x, float y, float scale, float r, float g, float b);
+void renderTextRectangle(unsigned int shader, std::string text, float x, float y, float width, float height, float r, float g, float b);

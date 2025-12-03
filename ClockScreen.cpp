@@ -38,7 +38,7 @@ void ClockScreen::draw(TextRenderer& textRenderer) {
         << std::setfill('0') << std::setw(2) << minutes << ":"
         << std::setfill('0') << std::setw(2) << seconds;
 
-    float textX = wWidth / 2.0f - 200.0f;
-    float textY = wHeight / 2.0f + 30.0f;
+    float textX = wWidth / 2.0f;
+    float textY = wHeight / 2.0f;
     textRenderer.renderText(timeStr.str(), textX, textY, 1.0f, 1.0f, 1.0f, 1.0f);
 }

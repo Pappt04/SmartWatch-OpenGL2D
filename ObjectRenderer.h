@@ -31,4 +31,11 @@ public:
     // For colored rectangles without texture
     void DrawColored(glm::vec2 position, glm::vec2 size,
         glm::vec3 color, float rotation = 0.0f);
+
+    // Draw colored rectangle at exact position
+    void DrawRectangle(float x, float y, float width, float height, glm::vec3 color);
+
+    // Draw textured rectangle at exact position (no center translation)
+    void DrawTexturedRectangle(unsigned int texture, float x, float y,
+        float width, float height);
 };

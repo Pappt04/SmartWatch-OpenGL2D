@@ -124,6 +124,103 @@ void ObjectRenderer::DrawColored(glm::vec2 position, glm::vec2 size,
     glBindVertexArray(0);
 }
 
+void ObjectRenderer::DrawRectangle(float x, float y, float width, float height, glm::vec3 color) {
+    // Use vertices anchored at origin (0,0) instead of centered vertices
+    float vertices[] = {
+        0.0f, 0.0f, 0.0f, 0.0f,  // bottom left
+        1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+        1.0f, 1.0f, 1.0f, 1.0f,  // top right
+        0.0f, 1.0f, 0.0f, 1.0f   // top left
+    };
+
+    // Create temporary VAO and VBO for origin-based rectangle
+    unsigned int tempVAO, tempVBO;
+    glGenVertexArrays(1, &tempVAO);
+    glGenBuffers(1, &tempVBO);
+
+    glBindVertexArray(tempVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, tempVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+        (void*)(2 * sizeof(float)));
+
+    // Apply transformations
+    glm::mat4 model(1.0f);
+    model = glm::translate(model, glm::vec3(x, y, 0.0f));
+    model = glm::scale(model, glm::vec3(width, height, 1.0f));
+
+    glUseProgram(shader);
+    setupProjection();
+    glUniformMatrix4fv(glGetUniformLocation(shader, "uModel"),
+        1, GL_FALSE, glm::value_ptr(model));
+    glUniform1i(glGetUniformLocation(shader, "uUseTexture"), 0);
+    glUniform3f(glGetUniformLocation(shader, "uColor"), color.r, color.g, color.b);
+
+    glBindVertexArray(tempVAO);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+    // Cleanup
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &tempVBO);
+    glDeleteVertexArrays(1, &tempVAO);
+}
+
+void ObjectRenderer::DrawTexturedRectangle(unsigned int texture, float x, float y,
+    float width, float height) {
+    // Use vertices anchored at origin (0,0) instead of centered vertices
+    float vertices[] = {
+        0.0f, 0.0f, 0.0f, 0.0f,  // bottom left
+        1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+        1.0f, 1.0f, 1.0f, 1.0f,  // top right
+        0.0f, 1.0f, 0.0f, 1.0f   // top left
+    };
+
+    // Create temporary VAO and VBO for origin-based rectangle
+    unsigned int tempVAO, tempVBO;
+    glGenVertexArrays(1, &tempVAO);
+    glGenBuffers(1, &tempVBO);
+
+    glBindVertexArray(tempVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, tempVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+        (void*)(2 * sizeof(float)));
+
+    // Apply transformations
+    glm::mat4 model(1.0f);
+    model = glm::translate(model, glm::vec3(x, y, 0.0f));
+    model = glm::scale(model, glm::vec3(width, height, 1.0f));
+
+    glUseProgram(shader);
+    setupProjection();
+    glUniformMatrix4fv(glGetUniformLocation(shader, "uModel"),
+        1, GL_FALSE, glm::value_ptr(model));
+    glUniform1i(glGetUniformLocation(shader, "uUseTexture"), 1);
+    glUniform1f(glGetUniformLocation(shader, "uTexOffsetX"), 0.0f);
+    glUniform1f(glGetUniformLocation(shader, "uTexScaleX"), 1.0f);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glBindVertexArray(tempVAO);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+    // Cleanup
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &tempVBO);
+    glDeleteVertexArrays(1, &tempVAO);
+}
+
 void ObjectRenderer::verticesInit() {
     float verticesRect[] = {
         -0.5f, -0.5f, 0.0f, 0.0f,  // bottom left

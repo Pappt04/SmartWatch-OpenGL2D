@@ -63,7 +63,7 @@ void ScreenManager::drawArrows(ObjectRenderer& renderer) {
         break;
 
     case SCREEN_HEART_RATE:
-        // Left arrow (flipped)
+        // Left arrow
         renderer.DrawFlipped(arrowRightTexture,
             glm::vec2(50.0f, arrowY),
             arrowSize, true, false, 0.0f);
@@ -74,7 +74,7 @@ void ScreenManager::drawArrows(ObjectRenderer& renderer) {
         break;
 
     case SCREEN_BATTERY:
-        // Left arrow (flipped)
+        // Left arrow
         renderer.DrawFlipped(arrowRightTexture,
             glm::vec2(50.0f, arrowY),
             arrowSize, true, false, 0.0f);

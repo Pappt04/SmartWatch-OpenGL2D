@@ -89,13 +89,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\..\..\Downloads\red_heart.svg.png">
+    <Image Include="..\..\..\..\..\..\Downloads\red_heart.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\..\..\..\..\Downloads\ecg-lines.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\full-battery.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\red_heart_pressed.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

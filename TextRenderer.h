@@ -15,5 +15,6 @@ public:
     void renderText(const std::string& text, float x, float y, float scale, 
                     float r, float g, float b);
     void setShader(unsigned int shader) { textShader = shader; }
+    void renderTextRectangle(unsigned int shader, std::string text, float x, float y, float width, float height, float r, float g, float b);
 };
 
