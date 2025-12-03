@@ -50,43 +50,35 @@ void EkgObject::update(double currentTime, bool running) {
 void EkgObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
     if (texture == 0) return;
 
-    // Calculate height based on BPM - scaled to fit within watch
-    // Higher BPM = TALLER waves (more energetic heart)
-    // Lower BPM = SHORTER waves (calm heart)
-    float baseHeight = 150.0f;  // Reduced to fit in watch
-    float maxHeight = 250.0f;   // Reduced to fit in watch
+    float baseHeight = 150.0f;
+    float maxHeight = 250.0f;
     float heightScale = 1.0f + ((heartRate - 70.0f) / 150.0f);
     heightScale = std::max(1.0f, std::min(1.67f, heightScale));
     float ekgHeight = baseHeight * heightScale;
 
-    // Width scaled to fit within the watch (leave room for arrows)
-    float ekgWidth = 400.0f;  // Reduced to fit better in watch
+    float ekgWidth = 400.0f;
 
-    // Center the EKG within the watch
     float centerX = wWidth / 2.0f;
     float centerY = wHeight / 2.0f;
     
     glm::vec2 ekgSize(ekgWidth, ekgHeight);
 	glm::uvec2 ekgPos(centerX, centerY);  
 
-    // Frequency increases with heart rate
-    float texScale = 2.f + ((heartRate - 70.0f) / 150.0f) * 1.2f;
-    texScale = std::max(0.3f, std::min(1.5f, texScale));
+    float texScale = 2.f + ((heartRate - 60.0f) / 150.0f) * 1.2f;
+    float temp = texScale;
+    texScale = std::max(0.3f, temp);
 
-    // Pass texture offset and scale to create scrolling effect
     renderer.Draw(texture, ekgPos, ekgSize, 0.0f, scrollOffset, texScale);
 	
-    // Draw heart rate text using renderTextRectangle - positioned below EKG
     std::string bpmText = std::to_string(heartRate) + " BPM";
     float textRectWidth = 200.0f;
     float textRectHeight = 60.0f;
     float textX = centerX - textRectWidth / 2.0f;
-    float textY = centerY + ekgHeight / 2.0f + 20.0f;  // Below the EKG
+    float textY = centerY + ekgHeight / 2.0f + 20.0f;
     textRenderer.renderTextRectangle(0, bpmText, textX, textY, textRectWidth, textRectHeight, 1.0f, 0.3f, 0.3f);
 
-    // Draw warning if heart rate > 200 - scaled to fit in watch
     if (heartRate > 200) {
-        float warnSize = 300.0f;  // Reduced from 600
+        float warnSize = 300.0f;
         glm::vec2 warnPos(centerX - warnSize / 2.0f, centerY - warnSize / 2.0f);
         glm::vec2 warnSizeVec(warnSize, warnSize);
         

@@ -290,7 +290,6 @@ void renderTextRectangle(unsigned int shader, std::string text, float x, float y
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Calculate total text width to determine scale
     float totalWidth = 0.0f;
     float maxHeight = 0.0f;
 
@@ -302,12 +301,10 @@ void renderTextRectangle(unsigned int shader, std::string text, float x, float y
             maxHeight = (float)ch.SizeY;
     }
 
-    // Calculate scale to fit within the rectangle
     float scaleX = width / totalWidth;
     float scaleY = height / maxHeight;
-    float scale = std::min(scaleX, scaleY); // Use smaller scale to fit both dimensions
+    float scale = std::min(scaleX, scaleY);
 
-    // Calculate starting position to align text at bottom-left of rectangle
     float currentX = x;
     float baseY = y;
 

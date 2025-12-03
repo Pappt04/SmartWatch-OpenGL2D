@@ -38,7 +38,6 @@ void ClockScreen::draw(TextRenderer& textRenderer) {
         << std::setfill('0') << std::setw(2) << minutes << ":"
         << std::setfill('0') << std::setw(2) << seconds;
 
-    // Center text within a rectangle in the middle of the screen
     float rectWidth = 400.0f;
     float rectHeight = 100.0f;
     float textX = wWidth / 2.0f - rectWidth / 2.0f;

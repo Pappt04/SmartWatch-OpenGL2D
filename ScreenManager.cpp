@@ -17,19 +17,16 @@ ScreenManager::~ScreenManager() {
 }
 
 bool ScreenManager::checkArrowClick(double xpos, double ypos, bool isLeft) {
-    // Calculate arrow positions relative to the watch center
     float centerX = wWidth / 2.0f;
     float centerY = wHeight / 2.0f;
     float watchRadius = 350.0f;
     
-    // Position arrows closer to the watch edges
-    float arrowSize = 80.0f;  // Reduced from 100
-    float arrowOffset = watchRadius - arrowSize - 20.0f;  // 20px inside watch edge
+    float arrowSize = 80.0f;  
+    float arrowOffset = watchRadius - arrowSize - 20.0f;
     
     float arrowX = isLeft ? (centerX - arrowOffset - arrowSize) : (centerX + arrowOffset);
     float arrowY = centerY - arrowSize / 2.0f;
 
-    // More precise click detection - must click within arrow bounds
     return (xpos >= arrowX && xpos <= arrowX + arrowSize &&
             ypos >= arrowY && ypos <= arrowY + arrowSize);
 }
@@ -60,14 +57,12 @@ void ScreenManager::handleClick(double xpos, double ypos) {
 }
 
 void ScreenManager::drawArrows(ObjectRenderer& renderer) {
-    // Calculate arrow positions relative to the watch center
     float centerX = wWidth / 2.0f;
     float centerY = wHeight / 2.0f;
     float watchRadius = 350.0f;
     
-    // Position arrows closer to the watch edges
-    float arrowSize = 80.0f;  // Reduced from 100
-    float arrowOffset = watchRadius - arrowSize - 20.0f;  // 20px inside watch edge
+    float arrowSize = 80.0f;
+    float arrowOffset = watchRadius - arrowSize - 20.0f;
     
     glm::vec2 arrowSizeVec(arrowSize, arrowSize);
     float arrowY = centerY - arrowSize / 2.0f;
@@ -81,7 +76,7 @@ void ScreenManager::drawArrows(ObjectRenderer& renderer) {
         break;
 
     case SCREEN_HEART_RATE:
-        // Left arrow (flipped)
+        // Left arrow
         renderer.DrawFlipped(arrowRightTexture,
             glm::vec2(centerX - arrowOffset - arrowSize, arrowY),
             arrowSizeVec, true, false, 0.0f);
@@ -92,7 +87,7 @@ void ScreenManager::drawArrows(ObjectRenderer& renderer) {
         break;
 
     case SCREEN_BATTERY:
-        // Left arrow (flipped)
+        // Left arrow
         renderer.DrawFlipped(arrowRightTexture,
             glm::vec2(centerX - arrowOffset - arrowSize, arrowY),
             arrowSizeVec, true, false, 0.0f);
@@ -101,33 +96,28 @@ void ScreenManager::drawArrows(ObjectRenderer& renderer) {
 }
 
 void ScreenManager::drawWatchBezel(ObjectRenderer& renderer) {
-    // Draw circular smartwatch bezel in the center of the screen
     float centerX = wWidth / 2.0f;
     float centerY = wHeight / 2.0f;
-    float watchRadius = 350.0f;  // Radius of the watch face
+    float watchRadius = 350.0f;
     
     // Draw outer bezel (dark gray)
     glm::vec3 bezelColor(0.2f, 0.2f, 0.2f);
     renderer.DrawCircle(glm::vec2(centerX, centerY), watchRadius + 15.0f, bezelColor, 100);
     
-    // Draw inner watch face (very dark, almost black)
+    // Draw inner watch face (very dark)
     glm::vec3 watchFaceColor(0.05f, 0.05f, 0.08f);
     renderer.DrawCircle(glm::vec2(centerX, centerY), watchRadius, watchFaceColor, 100);
 }
 
 void ScreenManager::draw(ObjectRenderer& renderer, TextRenderer& textRenderer, bool isRunning) {
-    // Draw the circular watch bezel first
     drawWatchBezel(renderer);
     
-    // Draw arrows
     drawArrows(renderer);
 
-    // Draw battery indicator on all screens except battery screen
     if (currentScreen != SCREEN_BATTERY && batteryScreen) {
         batteryScreen->drawIndicator(renderer, textRenderer);
     }
 
-    // Draw current screen content
     switch (currentScreen) {
     case SCREEN_CLOCK:
         if (clockScreen) {

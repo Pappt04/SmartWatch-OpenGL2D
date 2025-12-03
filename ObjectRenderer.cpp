@@ -83,7 +83,6 @@ void ObjectRenderer::DrawFlipped(unsigned int texture, glm::vec2 position, glm::
     model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f));
     model = glm::rotate(model, rotation, glm::vec3(0, 0, 1));
 
-    // Apply flip by scaling negatively
     float scaleX = flipHorizontal ? -size.x : size.x;
     float scaleY = flipVertical ? -size.y : size.y;
     model = glm::scale(model, glm::vec3(scaleX, scaleY, 1.0f));
@@ -127,7 +126,6 @@ void ObjectRenderer::DrawColored(glm::vec2 position, glm::vec2 size,
 }
 
 void ObjectRenderer::DrawRectangle(float x, float y, float width, float height, glm::vec3 color) {
-    // Use vertices anchored at origin (0,0) instead of centered vertices
     float vertices[] = {
         0.0f, 0.0f, 0.0f, 0.0f,  // bottom left
         1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
@@ -135,7 +133,6 @@ void ObjectRenderer::DrawRectangle(float x, float y, float width, float height, 
         0.0f, 1.0f, 0.0f, 1.0f   // top left
     };
 
-    // Create temporary VAO and VBO for origin-based rectangle
     unsigned int tempVAO, tempVBO;
     glGenVertexArrays(1, &tempVAO);
     glGenBuffers(1, &tempVBO);
@@ -151,7 +148,6 @@ void ObjectRenderer::DrawRectangle(float x, float y, float width, float height, 
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
         (void*)(2 * sizeof(float)));
 
-    // Apply transformations
     glm::mat4 model(1.0f);
     model = glm::translate(model, glm::vec3(x, y, 0.0f));
     model = glm::scale(model, glm::vec3(width, height, 1.0f));
@@ -166,7 +162,6 @@ void ObjectRenderer::DrawRectangle(float x, float y, float width, float height, 
     glBindVertexArray(tempVAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-    // Cleanup
     glBindVertexArray(0);
     glDeleteBuffers(1, &tempVBO);
     glDeleteVertexArrays(1, &tempVAO);
@@ -174,7 +169,6 @@ void ObjectRenderer::DrawRectangle(float x, float y, float width, float height, 
 
 void ObjectRenderer::DrawTexturedRectangle(unsigned int texture, float x, float y,
     float width, float height) {
-    // Use vertices anchored at origin (0,0) instead of centered vertices
     float vertices[] = {
         0.0f, 0.0f, 0.0f, 0.0f,  // bottom left
         1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
@@ -182,7 +176,6 @@ void ObjectRenderer::DrawTexturedRectangle(unsigned int texture, float x, float 
         0.0f, 1.0f, 0.0f, 1.0f   // top left
     };
 
-    // Create temporary VAO and VBO for origin-based rectangle
     unsigned int tempVAO, tempVBO;
     glGenVertexArrays(1, &tempVAO);
     glGenBuffers(1, &tempVBO);
@@ -198,7 +191,6 @@ void ObjectRenderer::DrawTexturedRectangle(unsigned int texture, float x, float 
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
         (void*)(2 * sizeof(float)));
 
-    // Apply transformations
     glm::mat4 model(1.0f);
     model = glm::translate(model, glm::vec3(x, y, 0.0f));
     model = glm::scale(model, glm::vec3(width, height, 1.0f));
@@ -217,21 +209,17 @@ void ObjectRenderer::DrawTexturedRectangle(unsigned int texture, float x, float 
     glBindVertexArray(tempVAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-    // Cleanup
     glBindVertexArray(0);
     glDeleteBuffers(1, &tempVBO);
     glDeleteVertexArrays(1, &tempVAO);
 }
 
 void ObjectRenderer::DrawCircle(glm::vec2 center, float radius, glm::vec3 color, int segments) {
-    // Create circle vertices using triangle fan
     std::vector<float> vertices;
     
-    // Center point
     vertices.push_back(center.x);
     vertices.push_back(center.y);
     
-    // Circle points
     for (int i = 0; i <= segments; i++) {
         float angle = 2.0f * 3.14159265359f * float(i) / float(segments);
         float x = center.x + radius * cos(angle);
@@ -240,7 +228,6 @@ void ObjectRenderer::DrawCircle(glm::vec2 center, float radius, glm::vec3 color,
         vertices.push_back(y);
     }
     
-    // Create temporary VAO and VBO
     unsigned int circleVAO, circleVBO;
     glGenVertexArrays(1, &circleVAO);
     glGenBuffers(1, &circleVBO);
@@ -252,7 +239,6 @@ void ObjectRenderer::DrawCircle(glm::vec2 center, float radius, glm::vec3 color,
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     
-    // Use identity model matrix (vertices are already in world space)
     glm::mat4 model(1.0f);
     
     glUseProgram(shader);
@@ -265,7 +251,6 @@ void ObjectRenderer::DrawCircle(glm::vec2 center, float radius, glm::vec3 color,
     glBindVertexArray(circleVAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
     
-    // Cleanup
     glBindVertexArray(0);
     glDeleteBuffers(1, &circleVBO);
     glDeleteVertexArrays(1, &circleVAO);

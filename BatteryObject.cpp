@@ -22,7 +22,7 @@ BatteryObject::~BatteryObject() {
 }
 
 void BatteryObject::update(double currentTime) {
-	if (currentTime - lastUpdate >= 0.1) {
+	if (currentTime - lastUpdate >= 0.5) {
 		lastUpdate = currentTime;
 		percent = std::max(0, percent - 1);
 	}
@@ -37,7 +37,6 @@ void BatteryObject::drawColoredRect(ObjectRenderer& renderer, float x, float y,
 void BatteryObject::drawIndicator(ObjectRenderer& renderer, TextRenderer& textRenderer) {
 	if (batteryTexture == 0) return;
 
-	// Draw small horizontal battery icon in top-right corner
 	float smallBatteryWidth = batteryWidth / 1.5f;
 	float smallBatteryHeight = batteryHeight / 1.5f;
 	float smallBatteryX = wWidth - smallBatteryWidth - 80.0f;
@@ -45,7 +44,6 @@ void BatteryObject::drawIndicator(ObjectRenderer& renderer, TextRenderer& textRe
 
 	renderer.DrawTexturedRectangle(batteryTexture, smallBatteryX, smallBatteryY, smallBatteryWidth, smallBatteryHeight);
 
-	// Calculate battery fill dimensions to fit inside texture
 	float fillPadding = 38.0f;
 	float maxFillWidth = smallBatteryWidth - 2.0f * fillPadding;
 	float fillWidth = maxFillWidth * (percent / 100.0f);
@@ -54,7 +52,6 @@ void BatteryObject::drawIndicator(ObjectRenderer& renderer, TextRenderer& textRe
 	float fillX = smallBatteryX + fillPadding / 2;
 	float fillY = smallBatteryY + fillPadding;
 
-	// Set color based on percentage
 	glm::vec3 fillColor;
 	if (percent > 20) {
 		fillColor = glm::vec3(0.0f, 1.0f, 0.0f);  // Green
@@ -68,7 +65,6 @@ void BatteryObject::drawIndicator(ObjectRenderer& renderer, TextRenderer& textRe
 
 	renderer.DrawRectangle(fillX, fillY, fillWidth, fillHeight, fillColor);
 
-	// Draw percentage text next to battery using renderTextRectangle
 	std::string percentText = std::to_string(percent) + "%";
 	float textRectWidth = 80.0f;
 	float textRectHeight = 40.0f;
@@ -80,14 +76,11 @@ void BatteryObject::drawIndicator(ObjectRenderer& renderer, TextRenderer& textRe
 void BatteryObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
 	if (batteryTexture == 0) return;
 
-	// Draw large horizontal battery in center (for battery screen)
 	glm::vec2 batteryPos(batteryX, batteryY);
 	glm::vec2 batterySize(batteryWidth, batteryHeight);
 	
-	//renderer.Draw(batteryTexture, batteryPos, batterySize, 0.0f);
 	renderer.DrawTexturedRectangle(batteryTexture, batteryX, batteryY, batteryWidth, batteryHeight);
 
-	// Calculate battery fill dimensions to fit inside texture
 	float fillPadding = 55.0f;
 	float maxFillWidth = batteryWidth - 2.0f * fillPadding;
 	float fillWidth = maxFillWidth * (percent / 100.0f);
@@ -96,7 +89,6 @@ void BatteryObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
 	float fillX = batteryX + fillPadding / 2;
 	float fillY = batteryY + fillPadding;
 
-	// Set color based on percentage
 	glm::vec3 fillColor;
 	if (percent > 20) {
 		fillColor = glm::vec3(0.0f, 1.0f, 0.0f);  // Green
@@ -110,7 +102,6 @@ void BatteryObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
 
 	renderer.DrawRectangle(fillX, fillY, fillWidth, fillHeight, fillColor);
 
-	// Draw battery percentage text above battery using renderTextRectangle
 	std::string percentText = std::to_string(percent) + "%";
 	float textRectWidth = 200.0f;
 	float textRectHeight = 80.0f;

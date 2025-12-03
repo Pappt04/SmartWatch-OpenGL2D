@@ -48,7 +48,6 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 }
 
 int main() {
-    // Initialize GLFW
     if (!glfwInit()) {
         return endProgram("GLFW failed to initialize");
     }
@@ -57,7 +56,6 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // Get screen resolution
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
     wWidth = mode->width;
@@ -65,14 +63,12 @@ int main() {
 
     std::cout << "Screen resolution detected: " << wWidth << "x" << wHeight << std::endl;
 
-    // Create window
     GLFWwindow* window = glfwCreateWindow(wWidth, wHeight, "SmartWatch2D", monitor, NULL);
     if (window == NULL) {
         return endProgram("Window creation failed");
     }
     glfwMakeContextCurrent(window);
 
-    // Set custom cursor
     basicCursor = loadImageToCursor("./res/red_heart_cursor.png");
     pressedCursor = loadImageToCursor("./res/red_heart_dark_cursor.png");
     if (basicCursor != nullptr) {
@@ -81,12 +77,10 @@ int main() {
 
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
-    // Initialize GLEW
     if (glewInit() != GLEW_OK) {
         return endProgram("GLEW initialization failed");
     }
 
-    // Initialize FreeType
     if (!initFreeType("./fonts/digit_font.ttf", 96)) {
         std::cout << "Warning: Primary font failed, trying alternative..." << std::endl;
         if (!initFreeType("C:/Windows/Fonts/arial.ttf", 96)) {
@@ -98,11 +92,9 @@ int main() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
 
-    // Create shaders
     unsigned int rectShader = createShader("rect.vert", "rect.frag");
     unsigned int textShader = createShader("text.vert", "text.frag");
 
-    // Set up text projection matrix
     glUseProgram(textShader);
     float textProjection[16] = {
         2.0f / wWidth, 0, 0, 0,
@@ -113,7 +105,6 @@ int main() {
     glUniformMatrix4fv(glGetUniformLocation(textShader, "projection"),
         1, GL_FALSE, textProjection);
 
-    // Load textures
     unsigned arrowRightTexture, warningTexture;
     unsigned ekgTexture, batteryTexture;
 
@@ -122,7 +113,6 @@ int main() {
     preprocessTexture(ekgTexture, "./res/ecg_wave.png");
     preprocessTexture(batteryTexture, "./res/battery.png");
 
-    // Create renderer and screen objects
     ObjectRenderer renderer(rectShader, wWidth, wHeight);
     TextRenderer textRenderer(textShader, wWidth, wHeight);
 
@@ -141,22 +131,18 @@ int main() {
         double currentTime = glfwGetTime();
         bool isRunning = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
 
-        // Update all screens
         clockScreen.update(currentTime);
         ekgScreen.update(currentTime, isRunning);
         batteryScreen.update(currentTime);
 
-        // Render
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Draw current screen
         screenManager.draw(renderer, textRenderer, isRunning);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    // Cleanup
     glDeleteProgram(rectShader);
     glDeleteProgram(textShader);
     if (basicCursor) glfwDestroyCursor(basicCursor);
