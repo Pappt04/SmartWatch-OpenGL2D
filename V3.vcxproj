@@ -159,6 +159,7 @@ copy /Y "$(ProjectDir)dependencies\freetype.dll" "$(OutDir)"</Command>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="ObjectRenderer.cpp" />
     <ClCompile Include="ScreenManager.cpp" />
+    <ClCompile Include="StudentInfoObject.cpp" />
     <ClCompile Include="TextRenderer.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
@@ -169,6 +170,7 @@ copy /Y "$(ProjectDir)dependencies\freetype.dll" "$(OutDir)"</Command>
     <ClInclude Include="ObjectRenderer.h" />
     <ClInclude Include="ScreenManager.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="StudentInfoObject.h" />
     <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>

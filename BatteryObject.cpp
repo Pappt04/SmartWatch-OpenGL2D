@@ -22,7 +22,7 @@ BatteryObject::~BatteryObject() {
 }
 
 void BatteryObject::update(double currentTime) {
-	if (currentTime - lastUpdate >= 0.5) {
+	if (currentTime - lastUpdate >= 10) {
 		lastUpdate = currentTime;
 		percent = std::max(0, percent - 1);
 	}
@@ -39,13 +39,13 @@ void BatteryObject::drawIndicator(ObjectRenderer& renderer, TextRenderer& textRe
 
 	float smallBatteryWidth = batteryWidth / 1.5f;
 	float smallBatteryHeight = batteryHeight / 1.5f;
-	float smallBatteryX = wWidth - smallBatteryWidth - 80.0f;
+	float smallBatteryX = wWidth - smallBatteryWidth - 20.0f;
 	float smallBatteryY = wHeight - smallBatteryHeight - 20.0f;
 
 	renderer.DrawTexturedRectangle(batteryTexture, smallBatteryX, smallBatteryY, smallBatteryWidth, smallBatteryHeight);
 
 	float fillPadding = 38.0f;
-	float maxFillWidth = smallBatteryWidth - 2.0f * fillPadding;
+	float maxFillWidth = smallBatteryWidth - 1.5f * fillPadding;
 	float fillWidth = maxFillWidth * (percent / 100.0f);
 	float fillHeight = smallBatteryHeight - 2.0f * fillPadding;
 
@@ -82,7 +82,7 @@ void BatteryObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
 	renderer.DrawTexturedRectangle(batteryTexture, batteryX, batteryY, batteryWidth, batteryHeight);
 
 	float fillPadding = 55.0f;
-	float maxFillWidth = batteryWidth - 2.0f * fillPadding;
+	float maxFillWidth = batteryWidth - 1.5f * fillPadding;
 	float fillWidth = maxFillWidth * (percent / 100.0f);
 	float fillHeight = batteryHeight - 2.0f * fillPadding;
 

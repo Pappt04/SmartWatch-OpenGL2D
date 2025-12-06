@@ -43,7 +43,7 @@ void EkgObject::update(double currentTime, bool running) {
     }
 
     // Scrolling speed increases with heart rate
-    scrollOffset += 0.0005f * (heartRate / 70.0f);
+    scrollOffset += 0.005f * (heartRate / 70.0f);
     if (scrollOffset > 1.0f) scrollOffset -= 1.0f;
 }
 

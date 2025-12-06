@@ -1,12 +1,10 @@
 #pragma once
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-class ObjectRenderer;
-class TextRenderer;
-class ClockScreen;
-class EkgObject;
-class BatteryObject;
+#include "StudentInfoObject.h"
+#include "ClockScreen.h"
+#include "EkgObject.h"
+#include "BatteryObject.h"
 
 enum Screen {
     SCREEN_CLOCK,
@@ -23,6 +21,7 @@ private:
     ClockScreen* clockScreen;
     EkgObject* ekgScreen;
     BatteryObject* batteryScreen;
+    StudentInfoObject* studentInfo;
 
     void drawArrows(ObjectRenderer& renderer);
     bool checkArrowClick(double xpos, double ypos, bool isLeft);
@@ -35,6 +34,7 @@ public:
     void setClockScreen(ClockScreen* clock) { clockScreen = clock; }
     void setEkgScreen(EkgObject* ekg) { ekgScreen = ekg; }
     void setBatteryScreen(BatteryObject* battery) { batteryScreen = battery; }
+	void setStudentInfo(StudentInfoObject* info) { studentInfo = info; }
 
     void handleClick(double xpos, double ypos);
     void draw(ObjectRenderer& renderer, TextRenderer& textRenderer, bool isRunning);

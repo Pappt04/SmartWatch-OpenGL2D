@@ -1,9 +1,5 @@
 #include "ScreenManager.h"
 #include "ObjectRenderer.h"
-#include "TextRenderer.h"
-#include "ClockScreen.h"
-#include "EkgObject.h"
-#include "BatteryObject.h"
 
 ScreenManager::ScreenManager(int screenWidth, int screenHeight, unsigned int rightArrow)
     : wWidth(screenWidth), wHeight(screenHeight),
@@ -113,6 +109,8 @@ void ScreenManager::draw(ObjectRenderer& renderer, TextRenderer& textRenderer, b
     drawWatchBezel(renderer);
     
     drawArrows(renderer);
+
+	studentInfo->draw(renderer, textRenderer);
 
     if (currentScreen != SCREEN_BATTERY && batteryScreen) {
         batteryScreen->drawIndicator(renderer, textRenderer);

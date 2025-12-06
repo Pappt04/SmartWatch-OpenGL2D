@@ -7,7 +7,12 @@
 #include "ClockScreen.h"
 #include "EkgObject.h"
 #include "BatteryObject.h"
+#include "StudentInfoObject.h"
 #include "ScreenManager.h"
+#include <chrono>
+#include <thread>
+
+#define TARGET_FPS 75
 
 int wWidth = 800, wHeight = 800;
 ScreenManager* g_screenManager = nullptr;
@@ -119,17 +124,27 @@ int main() {
     ClockScreen clockScreen(wWidth, wHeight);
     EkgObject ekgScreen(ekgTexture, warningTexture, wWidth, wHeight);
     BatteryObject batteryScreen(batteryTexture, wWidth, wHeight);
+    StudentInfoObject studentInfo("Tamas Papp","RA-4-2022", wWidth, wHeight);
 
     ScreenManager screenManager(wWidth, wHeight, arrowRightTexture);
     screenManager.setClockScreen(&clockScreen);
     screenManager.setEkgScreen(&ekgScreen);
     screenManager.setBatteryScreen(&batteryScreen);
+	screenManager.setStudentInfo(&studentInfo);
     g_screenManager = &screenManager;
+
+
+    auto lastFrameTime = std::chrono::high_resolution_clock::now();
+    const double frameTime = 1.0 / TARGET_FPS;
 
     // Main render loop
     while (!glfwWindowShouldClose(window)) {
         double currentTime = glfwGetTime();
         bool isRunning = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
+		bool shouldClose = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+        if (shouldClose) {
+            glfwSetWindowShouldClose(window, true);
+        }
 
         clockScreen.update(currentTime);
         ekgScreen.update(currentTime, isRunning);
@@ -141,6 +156,14 @@ int main() {
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+		// Frame limiter
+        std::chrono::duration<double> elapsedTime = std::chrono::high_resolution_clock::now() - lastFrameTime;
+        auto sleepTime = std::chrono::duration<double>(frameTime) - elapsedTime;
+        if (sleepTime.count() > 0.0) {
+            std::this_thread::sleep_for(sleepTime);
+        }
+        lastFrameTime = std::chrono::high_resolution_clock::now();
     }
 
     glDeleteProgram(rectShader);
