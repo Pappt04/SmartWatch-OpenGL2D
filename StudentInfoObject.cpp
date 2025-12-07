@@ -11,7 +11,6 @@ StudentInfoObject::StudentInfoObject(std::string studentname,std::string student
 	studentIndex = studentindex;
     cardWidth = 300.0f;
     cardHeight = 120.0f;
-    // Position in bottom right corner with some padding
     cardX = wWidth - cardWidth - 30.0f;
     cardY = 30.0f;
 }
@@ -20,20 +19,14 @@ StudentInfoObject::~StudentInfoObject() {
 }
 
 void StudentInfoObject::draw(ObjectRenderer& renderer, TextRenderer& textRenderer) {
-    // Draw card background (semi-transparent dark background)
     glm::vec3 cardColor(0.15f, 0.15f, 0.2f);
     renderer.DrawRectangle(cardX, cardY, cardWidth, cardHeight, cardColor);
 
-    // Draw card border
     glm::vec3 borderColor(0.3f, 0.3f, 0.4f);
     float borderThickness = 2.0f;
-    // Top border
     renderer.DrawRectangle(cardX, cardY + cardHeight - borderThickness, cardWidth, borderThickness, borderColor);
-    // Bottom border
     renderer.DrawRectangle(cardX, cardY, cardWidth, borderThickness, borderColor);
-    // Left border
     renderer.DrawRectangle(cardX, cardY, borderThickness, cardHeight, borderColor);
-    // Right border
     renderer.DrawRectangle(cardX + cardWidth - borderThickness, cardY, borderThickness, cardHeight, borderColor);
 
     // Render student name
